@@ -62,6 +62,17 @@ button {
   cursor: pointer;
 }
 
+/* En celular ocupa toda la pantalla. En pantallas anchas (PC, para probar)
+   se limita a un ancho de celular y se centra, como una vista previa. */
+@media (min-width: 560px) {
+  body {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    box-shadow: var(--sombra-suave);
+  }
+}
+
 .app-header {
   display: flex;
   align-items: center;
@@ -172,8 +183,10 @@ button {
 
 .toast {
   position: fixed;
-  left: 16px;
-  right: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 76px);
   background: var(--color-texto);
   color: var(--color-fondo);
