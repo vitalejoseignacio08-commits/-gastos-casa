@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Mis Gastos</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16a34a">
+
+<!-- iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Gastos">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header__total">
+    <span class="app-header__total-label">Este mes</span>
+    <span class="app-header__total-monto" id="header-total-mes">$ 0,00</span>
+  </div>
+  <button class="app-header__ajustes" id="btn-ajustes" type="button" aria-label="Ajustes">⚙️</button>
+</header>
+
+<main class="app-main" id="app-main">
+
+  <section class="pantalla" id="pantalla-registrar" data-pantalla="registrar">
+    <p class="placeholder">Registrar gasto (Etapa 2)</p>
+  </section>
+
+  <section class="pantalla" id="pantalla-historial" data-pantalla="historial" hidden>
+    <p class="placeholder">Historial (Etapa 4)</p>
+  </section>
+
+  <section class="pantalla" id="pantalla-resumen" data-pantalla="resumen" hidden>
+    <p class="placeholder">Resumen mensual (Etapa 5)</p>
+  </section>
+
+  <section class="pantalla" id="pantalla-categorias" data-pantalla="categorias" hidden>
+    <p class="placeholder">Categorías (Etapa 3)</p>
+  </section>
+
+  <section class="pantalla" id="pantalla-ajustes" data-pantalla="ajustes" hidden>
+    <h2>Ajustes</h2>
+    <p class="placeholder">Almacenamiento, instalación y copias de seguridad (Etapas 6-7)</p>
+  </section>
+
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button class="tabbar__item is-active" data-tab="registrar" type="button">
+    <span class="tabbar__icon">➕</span><span class="tabbar__label">Registrar</span>
+  </button>
+  <button class="tabbar__item" data-tab="historial" type="button">
+    <span class="tabbar__icon">📅</span><span class="tabbar__label">Historial</span>
+  </button>
+  <button class="tabbar__item" data-tab="resumen" type="button">
+    <span class="tabbar__icon">📊</span><span class="tabbar__label">Resumen</span>
+  </button>
+  <button class="tabbar__item" data-tab="categorias" type="button">
+    <span class="tabbar__icon">🏷️</span><span class="tabbar__label">Categorías</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast" hidden>
+  <span class="toast__mensaje" id="toast-mensaje"></span>
+  <button class="toast__accion" id="toast-accion" type="button" hidden></button>
+</div>
+
+<div class="modal-overlay" id="modal-error-datos" hidden>
+  <div class="modal">
+    <h2>No se pudieron leer tus datos</h2>
+    <p>Los datos guardados en este dispositivo están dañados o tienen un formato que la app no
+      reconoce. No se van a borrar ni a sobrescribir automáticamente.</p>
+    <textarea id="modal-error-contenido" readonly rows="6"></textarea>
+    <div class="modal__acciones">
+      <button class="btn btn--secundario" id="modal-error-copiar" type="button">Copiar contenido</button>
+      <button class="btn btn--peligro" id="modal-error-reiniciar" type="button">Empezar de nuevo (borra lo dañado)</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
