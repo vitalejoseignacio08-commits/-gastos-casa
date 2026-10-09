@@ -30,7 +30,30 @@
 <main class="app-main" id="app-main">
 
   <section class="pantalla" id="pantalla-registrar" data-pantalla="registrar">
-    <p class="placeholder">Registrar gasto (Etapa 2)</p>
+    <div class="fecha-selector">
+      <span class="fecha-selector__label" id="fecha-label">Hoy</span>
+      <button class="fecha-selector__btn" id="btn-cambiar-fecha" type="button">Cambiar fecha</button>
+      <input type="date" id="input-fecha" class="fecha-selector__input" aria-hidden="true" tabindex="-1">
+    </div>
+
+    <div class="monto-display" id="monto-display">$ 0</div>
+
+    <div class="grid-categorias" id="grid-categorias"></div>
+
+    <div class="teclado-numerico" id="teclado-numerico">
+      <button type="button" class="tecla" data-tecla="1">1</button>
+      <button type="button" class="tecla" data-tecla="2">2</button>
+      <button type="button" class="tecla" data-tecla="3">3</button>
+      <button type="button" class="tecla" data-tecla="4">4</button>
+      <button type="button" class="tecla" data-tecla="5">5</button>
+      <button type="button" class="tecla" data-tecla="6">6</button>
+      <button type="button" class="tecla" data-tecla="7">7</button>
+      <button type="button" class="tecla" data-tecla="8">8</button>
+      <button type="button" class="tecla" data-tecla="9">9</button>
+      <button type="button" class="tecla" data-tecla=",">,</button>
+      <button type="button" class="tecla" data-tecla="0">0</button>
+      <button type="button" class="tecla tecla--borrar" data-tecla="borrar" aria-label="Borrar">⌫</button>
+    </div>
   </section>
 
   <section class="pantalla" id="pantalla-historial" data-pantalla="historial" hidden>
@@ -81,6 +104,18 @@
     <div class="modal__acciones">
       <button class="btn btn--secundario" id="modal-error-copiar" type="button">Copiar contenido</button>
       <button class="btn btn--peligro" id="modal-error-reiniciar" type="button">Empezar de nuevo (borra lo dañado)</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="panel-subcategoria" hidden>
+  <div class="modal">
+    <h2 id="panel-subcategoria-titulo">Subcategoría</h2>
+    <div class="lista-subcategorias" id="lista-subcategorias"></div>
+    <input type="text" id="input-nota" class="input-nota" placeholder="Nota (opcional)" maxlength="80">
+    <div class="modal__acciones">
+      <button class="btn btn--primario" id="btn-subcategoria-guardar" type="button">Guardar</button>
+      <button class="btn btn--secundario" id="btn-subcategoria-cancelar" type="button">Cancelar</button>
     </div>
   </div>
 </div>

@@ -100,10 +100,12 @@ function iniciarApp() {
   } else {
     estado = resultado.estado;
     guardarEstado(estado);
+    renderizarCategoriasRegistro();
   }
 
   actualizarTotalHeader();
   configurarNavegacion();
+  configurarRegistrarGasto();
   pedirAlmacenamientoPersistente();
 }
 
@@ -132,6 +134,7 @@ function mostrarModalErrorDatos(contenidoCrudo) {
     guardarEstado(estado);
     overlay.hidden = true;
     actualizarTotalHeader();
+    renderizarCategoriasRegistro();
   };
 }
 
@@ -221,6 +224,237 @@ function irAPantalla(nombre) {
   });
   document.querySelectorAll('.tabbar__item').forEach((el) => {
     el.classList.toggle('is-active', el.dataset.tab === nombre);
+  });
+}
+
+/* =========================================================================
+   Registrar gasto
+   ========================================================================= */
+
+let bufferMonto = '';
+let fechaSeleccionada = formatearFechaISO(new Date());
+let categoriaSeleccionadaId = null;
+let subcategoriaElegidaId = null;
+
+function formatearFechaISO(fecha) {
+  const y = fecha.getFullYear();
+  const m = String(fecha.getMonth() + 1).padStart(2, '0');
+  const d = String(fecha.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function formatearBufferMonto(buffer) {
+  if (buffer === '') return '0';
+  const partes = buffer.split(',');
+  const enteroCrudo = partes[0] === '' ? '0' : partes[0].replace(/^0+(?=\d)/, '');
+  const enteroFormateado = enteroCrudo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if (partes.length === 1) return enteroFormateado;
+  return enteroFormateado + ',' + partes[1];
+}
+
+function parsearBufferMonto(buffer) {
+  if (buffer === '') return 0;
+  const valor = parseFloat(buffer.replace(',', '.'));
+  return isNaN(valor) ? 0 : valor;
+}
+
+function actualizarDisplayMonto() {
+  document.getElementById('monto-display').textContent = '$ ' + formatearBufferMonto(bufferMonto);
+}
+
+function shakeMonto() {
+  const el = document.getElementById('monto-display');
+  el.classList.remove('shake');
+  // Forzar reflow para poder re-disparar la animación si ya estaba corriendo.
+  void el.offsetWidth;
+  el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 300);
+}
+
+function animarGuardado() {
+  const el = document.getElementById('monto-display');
+  el.classList.add('guardado-ok');
+  setTimeout(() => el.classList.remove('guardado-ok'), 400);
+}
+
+function actualizarLabelFecha() {
+  const hoyISO = formatearFechaISO(new Date());
+  const label = document.getElementById('fecha-label');
+  if (fechaSeleccionada === hoyISO) {
+    label.textContent = 'Hoy';
+    return;
+  }
+  const [y, m, d] = fechaSeleccionada.split('-').map(Number);
+  const fecha = new Date(y, m - 1, d);
+  label.textContent = fecha.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+}
+
+function renderizarCategoriasRegistro() {
+  const cont = document.getElementById('grid-categorias');
+  if (!cont || !estado) return;
+  cont.innerHTML = '';
+  estado.categorias
+    .filter((c) => !c.oculta)
+    .forEach((cat) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'categoria-card';
+      btn.style.setProperty('--categoria-color', cat.color);
+      btn.dataset.categoriaId = cat.id;
+      btn.innerHTML =
+        '<span class="categoria-card__emoji">' + cat.emoji + '</span>' +
+        '<span class="categoria-card__nombre">' + cat.nombre + '</span>';
+      cont.appendChild(btn);
+    });
+}
+
+function onTocarCategoria(categoriaId) {
+  const monto = parsearBufferMonto(bufferMonto);
+  if (monto <= 0) {
+    shakeMonto();
+    return;
+  }
+
+  const categoria = estado.categorias.find((c) => c.id === categoriaId);
+  if (!categoria) return;
+
+  const subcategoriasVisibles = categoria.subcategorias.filter((s) => !s.oculta);
+
+  if (subcategoriasVisibles.length > 0) {
+    abrirPanelSubcategoria(categoria, subcategoriasVisibles);
+  } else {
+    guardarGasto(categoriaId, null, '');
+  }
+}
+
+function abrirPanelSubcategoria(categoria, subcategoriasVisibles) {
+  categoriaSeleccionadaId = categoria.id;
+  subcategoriaElegidaId = null;
+
+  document.getElementById('panel-subcategoria-titulo').textContent = categoria.nombre;
+  document.getElementById('input-nota').value = '';
+
+  const lista = document.getElementById('lista-subcategorias');
+  lista.innerHTML = '';
+
+  const opcionSinSub = crearOpcionSubcategoria('Sin subcategoría', null);
+  opcionSinSub.classList.add('is-active');
+  lista.appendChild(opcionSinSub);
+
+  subcategoriasVisibles.forEach((sub) => {
+    lista.appendChild(crearOpcionSubcategoria(sub.nombre, sub.id));
+  });
+
+  document.getElementById('panel-subcategoria').hidden = false;
+}
+
+function crearOpcionSubcategoria(nombre, subId) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'subcategoria-opcion';
+  btn.textContent = nombre;
+  btn.dataset.subId = subId === null ? '' : subId;
+  btn.addEventListener('click', () => {
+    subcategoriaElegidaId = subId;
+    document.querySelectorAll('.subcategoria-opcion').forEach((el) => el.classList.remove('is-active'));
+    btn.classList.add('is-active');
+  });
+  return btn;
+}
+
+function cerrarPanelSubcategoria() {
+  document.getElementById('panel-subcategoria').hidden = true;
+  categoriaSeleccionadaId = null;
+  subcategoriaElegidaId = null;
+}
+
+function guardarGasto(categoriaId, subcategoriaId, nota) {
+  const monto = parsearBufferMonto(bufferMonto);
+  if (monto <= 0) return;
+
+  const ahora = new Date().toISOString();
+  const gasto = {
+    id: generarId(),
+    monto,
+    fecha: fechaSeleccionada,
+    categoriaId,
+    subcategoriaId: subcategoriaId || null,
+    nota: nota || '',
+    creadoEn: ahora,
+    actualizadoEn: ahora,
+  };
+
+  estado.gastos.push(gasto);
+  guardarEstado(estado);
+  actualizarTotalHeader();
+
+  bufferMonto = '';
+  actualizarDisplayMonto();
+  cerrarPanelSubcategoria();
+  animarGuardado();
+
+  mostrarToast('Gasto guardado', 'Deshacer', () => deshacerGasto(gasto.id));
+}
+
+function deshacerGasto(id) {
+  estado.gastos = estado.gastos.filter((g) => g.id !== id);
+  guardarEstado(estado);
+  actualizarTotalHeader();
+}
+
+function configurarRegistrarGasto() {
+  document.getElementById('teclado-numerico').addEventListener('click', (ev) => {
+    const boton = ev.target.closest('.tecla');
+    if (!boton || !estado) return;
+    const tecla = boton.dataset.tecla;
+
+    if (tecla === 'borrar') {
+      bufferMonto = bufferMonto.slice(0, -1);
+    } else if (tecla === ',') {
+      if (!bufferMonto.includes(',')) {
+        bufferMonto = (bufferMonto === '' ? '0' : bufferMonto) + ',';
+      }
+    } else {
+      const partes = bufferMonto.split(',');
+      const decimales = partes[1];
+      const digitosEnteros = partes[0].replace(/^0+(?=\d)/, '').length;
+      if (decimales !== undefined && decimales.length >= 2) return;
+      if (decimales === undefined && digitosEnteros >= 9) return;
+      bufferMonto += tecla;
+    }
+
+    actualizarDisplayMonto();
+  });
+
+  document.getElementById('grid-categorias').addEventListener('click', (ev) => {
+    const tarjeta = ev.target.closest('.categoria-card');
+    if (!tarjeta || !estado) return;
+    onTocarCategoria(tarjeta.dataset.categoriaId);
+  });
+
+  const inputFecha = document.getElementById('input-fecha');
+  inputFecha.value = fechaSeleccionada;
+
+  document.getElementById('btn-cambiar-fecha').addEventListener('click', () => {
+    if (typeof inputFecha.showPicker === 'function') {
+      inputFecha.showPicker();
+    } else {
+      inputFecha.click();
+    }
+  });
+
+  inputFecha.addEventListener('change', () => {
+    if (inputFecha.value) {
+      fechaSeleccionada = inputFecha.value;
+      actualizarLabelFecha();
+    }
+  });
+
+  document.getElementById('btn-subcategoria-cancelar').addEventListener('click', cerrarPanelSubcategoria);
+
+  document.getElementById('btn-subcategoria-guardar').addEventListener('click', () => {
+    const nota = document.getElementById('input-nota').value.trim();
+    guardarGasto(categoriaSeleccionadaId, subcategoriaElegidaId, nota);
   });
 }
 
