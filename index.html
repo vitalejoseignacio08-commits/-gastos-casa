@@ -57,7 +57,16 @@
   </section>
 
   <section class="pantalla" id="pantalla-historial" data-pantalla="historial" hidden>
-    <p class="placeholder">Historial (Etapa 4)</p>
+    <div class="historial-header">
+      <button type="button" class="icon-btn icon-btn--grande" id="btn-mes-anterior" aria-label="Mes anterior">‹</button>
+      <div class="historial-header__info">
+        <span class="historial-header__mes" id="historial-mes-label">—</span>
+        <span class="historial-header__total" id="historial-mes-total">$ 0,00</span>
+      </div>
+      <button type="button" class="icon-btn icon-btn--grande" id="btn-mes-siguiente" aria-label="Mes siguiente">›</button>
+    </div>
+
+    <div id="historial-contenido"></div>
   </section>
 
   <section class="pantalla" id="pantalla-resumen" data-pantalla="resumen" hidden>
@@ -169,6 +178,33 @@
     <div class="modal__acciones">
       <button class="btn btn--peligro" id="modal-confirmar-aceptar" type="button">Sí, continuar</button>
       <button class="btn btn--secundario" id="modal-confirmar-cancelar" type="button">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="panel-editar-gasto" hidden>
+  <div class="modal">
+    <h2>Editar gasto</h2>
+
+    <label class="campo-label" for="editar-monto">Monto</label>
+    <input type="text" id="editar-monto" class="input-texto" inputmode="decimal" placeholder="0,00">
+
+    <label class="campo-label" for="editar-fecha">Fecha</label>
+    <input type="date" id="editar-fecha" class="input-texto">
+
+    <label class="campo-label" for="editar-categoria">Categoría</label>
+    <select id="editar-categoria" class="input-texto"></select>
+
+    <label class="campo-label" for="editar-subcategoria">Subcategoría</label>
+    <select id="editar-subcategoria" class="input-texto"></select>
+
+    <label class="campo-label" for="editar-nota">Nota</label>
+    <input type="text" id="editar-nota" class="input-texto" maxlength="80" placeholder="Nota (opcional)">
+
+    <div class="modal__acciones">
+      <button class="btn btn--primario" id="btn-editar-guardar" type="button">Guardar</button>
+      <button class="btn btn--peligro" id="btn-editar-borrar" type="button">Borrar gasto</button>
+      <button class="btn btn--secundario" id="btn-editar-cancelar" type="button">Cancelar</button>
     </div>
   </div>
 </div>
