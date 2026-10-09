@@ -65,7 +65,17 @@
   </section>
 
   <section class="pantalla" id="pantalla-categorias" data-pantalla="categorias" hidden>
-    <p class="placeholder">Categorías (Etapa 3)</p>
+    <div class="categorias-header">
+      <h2>Categorías</h2>
+      <button class="btn btn--primario btn--chico" id="btn-nueva-categoria" type="button">+ Nueva categoría</button>
+    </div>
+
+    <div id="lista-categorias"></div>
+
+    <details class="ocultos-detalle" id="detalle-ocultos">
+      <summary>Categorías y subcategorías ocultas</summary>
+      <div id="lista-ocultos"></div>
+    </details>
   </section>
 
   <section class="pantalla" id="pantalla-ajustes" data-pantalla="ajustes" hidden>
@@ -116,6 +126,49 @@
     <div class="modal__acciones">
       <button class="btn btn--primario" id="btn-subcategoria-guardar" type="button">Guardar</button>
       <button class="btn btn--secundario" id="btn-subcategoria-cancelar" type="button">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="panel-categoria" hidden>
+  <div class="modal">
+    <h2 id="panel-categoria-titulo">Nueva categoría</h2>
+
+    <label class="campo-label" for="input-categoria-nombre">Nombre</label>
+    <input type="text" id="input-categoria-nombre" class="input-texto" maxlength="30" placeholder="Ej: Mascotas">
+
+    <label class="campo-label">Emoji</label>
+    <div class="emoji-grid" id="emoji-grid"></div>
+
+    <label class="campo-label">Color</label>
+    <div class="color-grid" id="color-grid"></div>
+
+    <div class="modal__acciones">
+      <button class="btn btn--primario" id="btn-categoria-guardar" type="button">Guardar</button>
+      <button class="btn btn--secundario" id="btn-categoria-cancelar" type="button">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="panel-subcat-editor" hidden>
+  <div class="modal">
+    <h2 id="panel-subcat-editor-titulo">Nueva subcategoría</h2>
+    <label class="campo-label" for="input-subcat-nombre">Nombre</label>
+    <input type="text" id="input-subcat-nombre" class="input-texto" maxlength="30" placeholder="Ej: Veterinaria">
+    <div class="modal__acciones">
+      <button class="btn btn--primario" id="btn-subcat-guardar" type="button">Guardar</button>
+      <button class="btn btn--secundario" id="btn-subcat-cancelar" type="button">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirmar" hidden>
+  <div class="modal">
+    <h2 id="modal-confirmar-titulo">Confirmar</h2>
+    <p id="modal-confirmar-mensaje"></p>
+    <div class="modal__acciones">
+      <button class="btn btn--peligro" id="modal-confirmar-aceptar" type="button">Sí, continuar</button>
+      <button class="btn btn--secundario" id="modal-confirmar-cancelar" type="button">Cancelar</button>
     </div>
   </div>
 </div>
