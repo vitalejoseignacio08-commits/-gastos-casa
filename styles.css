@@ -728,6 +728,16 @@ select.input-texto {
   text-align: center;
 }
 
+.ajustes-estado {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  margin: 0 0 8px;
+}
+
+.ajustes-estado:last-child {
+  margin-bottom: 0;
+}
+
 .ajustes-aviso {
   background: color-mix(in srgb, var(--color-peligro) 12%, var(--color-fondo));
   color: var(--color-peligro);

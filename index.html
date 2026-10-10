@@ -8,6 +8,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#16a34a">
 
+<!-- Android/Chrome -->
+<meta name="mobile-web-app-capable" content="yes">
+
 <!-- iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -126,8 +129,9 @@
     </div>
 
     <div class="ajustes-seccion">
-      <h3>Almacenamiento</h3>
-      <p class="placeholder">Persistencia e instalación (Etapa 7)</p>
+      <h3>Almacenamiento e instalación</h3>
+      <p class="ajustes-estado" id="estado-almacenamiento-persistido">Verificando…</p>
+      <p class="ajustes-estado" id="estado-almacenamiento-instalada">Verificando…</p>
     </div>
   </section>
 

@@ -114,6 +114,7 @@ function iniciarApp() {
   configurarAjustes();
   actualizarAvisoBackup();
   pedirAlmacenamientoPersistente();
+  registrarServiceWorker();
 }
 
 /* =========================================================================
@@ -241,6 +242,7 @@ function irAPantalla(nombre) {
     renderizarResumen();
   } else if (nombre === 'ajustes') {
     actualizarAvisoBackup();
+    actualizarEstadoAlmacenamiento();
   }
 }
 
@@ -1405,7 +1407,7 @@ function configurarAjustes() {
 }
 
 /* =========================================================================
-   Almacenamiento persistente
+   Almacenamiento persistente, instalación y service worker
    ========================================================================= */
 
 async function pedirAlmacenamientoPersistente() {
@@ -1416,6 +1418,40 @@ async function pedirAlmacenamientoPersistente() {
       console.warn('No se pudo solicitar almacenamiento persistente', e);
     }
   }
+  actualizarEstadoAlmacenamiento();
+}
+
+async function actualizarEstadoAlmacenamiento() {
+  const elPersistido = document.getElementById('estado-almacenamiento-persistido');
+  const elInstalada = document.getElementById('estado-almacenamiento-instalada');
+  if (!elPersistido || !elInstalada) return;
+
+  let persistido = false;
+  if (navigator.storage && navigator.storage.persisted) {
+    try {
+      persistido = await navigator.storage.persisted();
+    } catch (e) {
+      persistido = false;
+    }
+  }
+  elPersistido.textContent = persistido
+    ? 'Protegido: el sistema no va a borrar estos datos para liberar espacio.'
+    : 'No protegido: en algunos casos el sistema podría llegar a borrar estos datos si el dispositivo necesita espacio.';
+
+  const esStandalone =
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  elInstalada.textContent = esStandalone
+    ? 'Estás usando la app instalada en tu celular.'
+    : 'Estás usando la app desde el navegador (no instalada). Instalala para una mejor experiencia.';
+}
+
+function registrarServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((e) => {
+      console.warn('No se pudo registrar el service worker', e);
+    });
+  });
 }
 
 /* =========================================================================
