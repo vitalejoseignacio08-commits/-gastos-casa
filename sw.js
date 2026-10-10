@@ -41,6 +41,7 @@ self.addEventListener('activate', (evento) => {
 
 self.addEventListener('fetch', (evento) => {
   if (evento.request.method !== 'GET') return;
+  if (!evento.request.url.startsWith('http')) return; // ignora chrome-extension:// y similares
 
   evento.respondWith(
     caches.match(evento.request).then((respuestaCacheada) => {
