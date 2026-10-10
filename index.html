@@ -109,7 +109,22 @@
 
   <section class="pantalla" id="pantalla-ajustes" data-pantalla="ajustes" hidden>
     <h2>Ajustes</h2>
-    <p class="placeholder">Almacenamiento, instalación y copias de seguridad (Etapas 6-7)</p>
+
+    <div class="ajustes-seccion">
+      <h3>Copia de seguridad</h3>
+      <p class="ajustes-aviso" id="aviso-backup" hidden></p>
+      <div class="ajustes-botones">
+        <button class="btn btn--primario" id="btn-exportar-json" type="button">Exportar copia (.json)</button>
+        <label class="btn btn--secundario" id="btn-importar-json" for="input-importar-json">Importar copia (.json)</label>
+        <input type="file" id="input-importar-json" accept="application/json,.json" hidden>
+        <button class="btn btn--secundario" id="btn-exportar-csv" type="button">Exportar para Excel (.csv)</button>
+      </div>
+    </div>
+
+    <div class="ajustes-seccion">
+      <h3>Almacenamiento</h3>
+      <p class="placeholder">Persistencia e instalación (Etapa 7)</p>
+    </div>
   </section>
 
 </main>

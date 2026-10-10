@@ -693,6 +693,42 @@ select.input-texto {
   text-transform: capitalize;
 }
 
+/* Ajustes */
+
+.ajustes-seccion {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.ajustes-seccion h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.ajustes-botones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ajustes-botones .btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.ajustes-aviso {
+  background: color-mix(in srgb, var(--color-peligro) 12%, var(--color-fondo));
+  color: var(--color-peligro);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+}
+
 .placeholder {
   color: var(--color-texto-suave);
   text-align: center;

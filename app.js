@@ -110,6 +110,8 @@ function iniciarApp() {
   configurarPantallaCategorias();
   configurarHistorial();
   configurarModalConfirmar();
+  configurarAjustes();
+  actualizarAvisoBackup();
   pedirAlmacenamientoPersistente();
 }
 
@@ -140,6 +142,7 @@ function mostrarModalErrorDatos(contenidoCrudo) {
     actualizarTotalHeader();
     renderizarCategoriasRegistro();
     renderizarPantallaCategorias();
+    actualizarAvisoBackup();
   };
 }
 
@@ -235,6 +238,8 @@ function irAPantalla(nombre) {
     renderizarHistorial();
   } else if (nombre === 'resumen') {
     renderizarResumen();
+  } else if (nombre === 'ajustes') {
+    actualizarAvisoBackup();
   }
 }
 
@@ -1243,6 +1248,141 @@ function renderizarGrafico12Meses() {
     });
 
     cont.appendChild(barra);
+  });
+}
+
+/* =========================================================================
+   Copias de seguridad
+   ========================================================================= */
+
+function descargarBlob(blob, nombreArchivo) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function registrarBackupRealizado() {
+  estado.config.ultimaBackup = new Date().toISOString();
+  guardarEstado(estado);
+  actualizarAvisoBackup();
+}
+
+function exportarJSON() {
+  const contenido = JSON.stringify(estado, null, 2);
+  const blob = new Blob([contenido], { type: 'application/json' });
+  descargarBlob(blob, 'mis-gastos-' + formatearFechaISO(new Date()) + '.json');
+  registrarBackupRealizado();
+  mostrarToast('Copia exportada');
+}
+
+function escaparCampoCsv(valor) {
+  const texto = String(valor === undefined || valor === null ? '' : valor);
+  if (texto.includes(';') || texto.includes('"') || texto.includes('\n')) {
+    return '"' + texto.replace(/"/g, '""') + '"';
+  }
+  return texto;
+}
+
+function exportarCSV() {
+  const encabezado = ['Fecha', 'Categoría', 'Subcategoría', 'Nota', 'Monto'];
+
+  const filas = estado.gastos
+    .slice()
+    .sort((a, b) => (a.fecha < b.fecha ? -1 : 1))
+    .map((g) => {
+      const categoria = obtenerCategoriaPorId(g.categoriaId);
+      const sub = obtenerSubcategoriaPorId(categoria, g.subcategoriaId);
+      const montoTexto = g.monto.toFixed(2).replace('.', ',');
+      return [g.fecha, categoria ? categoria.nombre : '', sub ? sub.nombre : '', g.nota || '', montoTexto];
+    });
+
+  const lineas = [encabezado, ...filas].map((fila) => fila.map(escaparCampoCsv).join(';'));
+  const contenido = '﻿' + lineas.join('\r\n');
+  const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8' });
+  descargarBlob(blob, 'mis-gastos-' + formatearFechaISO(new Date()) + '.csv');
+  registrarBackupRealizado();
+  mostrarToast('CSV exportado');
+}
+
+function intentarImportarJSON(contenidoTexto) {
+  let datos;
+  try {
+    datos = JSON.parse(contenidoTexto);
+  } catch (e) {
+    mostrarToast('El archivo no es un JSON válido');
+    return;
+  }
+
+  if (!datos || typeof datos !== 'object' || !Array.isArray(datos.gastos) || !Array.isArray(datos.categorias)) {
+    mostrarToast('El archivo no tiene el formato que espera la app');
+    return;
+  }
+
+  const cantidad = datos.gastos.length;
+  const mensaje =
+    'Este archivo tiene ' + cantidad + (cantidad === 1 ? ' gasto registrado' : ' gastos registrados') +
+    '. Si confirmás, se va a reemplazar todo lo que tenés guardado ahora en este dispositivo.';
+
+  pedirConfirmacion(mensaje, 'Reemplazar datos', () => {
+    estado = datos;
+    if (!estado.config) estado.config = { ultimaBackup: null };
+    if (typeof estado.version !== 'number') estado.version = VERSION_ESTADO;
+
+    guardarEstado(estado);
+    renderizarCategoriasRegistro();
+    renderizarPantallaCategorias();
+    actualizarTotalHeader();
+    actualizarAvisoBackup();
+    mostrarToast('Datos importados correctamente');
+  });
+}
+
+function actualizarAvisoBackup() {
+  const aviso = document.getElementById('aviso-backup');
+  if (!estado || estado.gastos.length === 0) {
+    aviso.hidden = true;
+    return;
+  }
+
+  const ultimaBackup = estado.config.ultimaBackup;
+  if (!ultimaBackup) {
+    aviso.hidden = false;
+    aviso.textContent = 'Todavía no hiciste ninguna copia de seguridad. Te recomendamos exportar tus datos.';
+    return;
+  }
+
+  const dias = Math.floor((Date.now() - new Date(ultimaBackup).getTime()) / (1000 * 60 * 60 * 24));
+  if (dias > 30) {
+    aviso.hidden = false;
+    aviso.textContent = 'Pasaron ' + dias + ' días desde tu última copia de seguridad. Te recomendamos exportar tus datos de nuevo.';
+  } else {
+    aviso.hidden = true;
+  }
+}
+
+function configurarAjustes() {
+  document.getElementById('btn-exportar-json').addEventListener('click', exportarJSON);
+  document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
+
+  document.getElementById('input-importar-json').addEventListener('change', (ev) => {
+    const archivo = ev.target.files[0];
+    if (!archivo) return;
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      intentarImportarJSON(lector.result);
+      ev.target.value = '';
+    };
+    lector.onerror = () => {
+      mostrarToast('No se pudo leer el archivo');
+      ev.target.value = '';
+    };
+    lector.readAsText(archivo);
   });
 }
 
