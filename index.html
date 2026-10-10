@@ -70,7 +70,18 @@
   </section>
 
   <section class="pantalla" id="pantalla-resumen" data-pantalla="resumen" hidden>
-    <p class="placeholder">Resumen mensual (Etapa 5)</p>
+    <div class="resumen-total">
+      <span class="resumen-total__label" id="resumen-mes-label">—</span>
+      <span class="resumen-total__monto" id="resumen-total-monto">$ 0,00</span>
+      <span class="resumen-total__comparacion" id="resumen-comparacion"></span>
+      <span class="resumen-total__promedio" id="resumen-promedio"></span>
+    </div>
+
+    <h3 class="resumen-subtitulo">Por categoría</h3>
+    <div id="resumen-categorias"></div>
+
+    <h3 class="resumen-subtitulo">Últimos 12 meses</h3>
+    <div class="grafico-12meses" id="grafico-12meses"></div>
   </section>
 
   <section class="pantalla" id="pantalla-categorias" data-pantalla="categorias" hidden>

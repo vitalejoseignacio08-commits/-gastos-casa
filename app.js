@@ -233,6 +233,8 @@ function irAPantalla(nombre) {
 
   if (nombre === 'historial') {
     renderizarHistorial();
+  } else if (nombre === 'resumen') {
+    renderizarResumen();
   }
 }
 
@@ -1036,6 +1038,177 @@ function configurarHistorial() {
   document.getElementById('btn-editar-cancelar').addEventListener('click', cerrarPanelEditarGasto);
   document.getElementById('btn-editar-guardar').addEventListener('click', guardarEdicionGasto);
   document.getElementById('btn-editar-borrar').addEventListener('click', borrarGastoEnEdicion);
+}
+
+/* =========================================================================
+   Resumen mensual
+   ========================================================================= */
+
+let resumenAnio = hoyHistorial.getFullYear();
+let resumenMes = hoyHistorial.getMonth();
+
+function diasParaPromedio(anio, mes) {
+  const hoy = new Date();
+  const esMesActual = anio === hoy.getFullYear() && mes === hoy.getMonth();
+  if (esMesActual) return hoy.getDate();
+  return new Date(anio, mes + 1, 0).getDate();
+}
+
+function renderizarResumen() {
+  if (!estado) return;
+
+  document.getElementById('resumen-mes-label').textContent = capitalizar(
+    new Date(resumenAnio, resumenMes, 1).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
+  );
+
+  const gastosDelMes = estado.gastos.filter((g) => {
+    const [y, m] = g.fecha.split('-').map(Number);
+    return y === resumenAnio && m === resumenMes + 1;
+  });
+  const totalMes = gastosDelMes.reduce((acc, g) => acc + g.monto, 0);
+  document.getElementById('resumen-total-monto').textContent = formatearMonto(totalMes);
+
+  renderizarComparacionMensual(totalMes);
+  renderizarPromedioDiario(totalMes);
+  renderizarCategoriasResumen(gastosDelMes);
+  renderizarGrafico12Meses();
+}
+
+function renderizarComparacionMensual(totalActual) {
+  let mesAnterior = resumenMes - 1;
+  let anioAnterior = resumenAnio;
+  if (mesAnterior < 0) {
+    mesAnterior = 11;
+    anioAnterior -= 1;
+  }
+  const totalAnterior = totalDelMes(anioAnterior, mesAnterior);
+  const el = document.getElementById('resumen-comparacion');
+
+  if (totalAnterior === 0) {
+    el.textContent = totalActual === 0 ? 'Sin gastos registrados este mes.' : 'El mes anterior no tuviste gastos registrados.';
+    return;
+  }
+
+  const diferencia = totalActual - totalAnterior;
+  const porcentaje = (diferencia / totalAnterior) * 100;
+  const signo = diferencia >= 0 ? '+' : '';
+  el.textContent = signo + porcentaje.toFixed(0) + '% vs. mes anterior (' + signo + formatearMonto(diferencia) + ')';
+}
+
+function renderizarPromedioDiario(totalActual) {
+  const dias = diasParaPromedio(resumenAnio, resumenMes);
+  const promedio = dias > 0 ? totalActual / dias : 0;
+  document.getElementById('resumen-promedio').textContent = 'Promedio por día: ' + formatearMonto(promedio);
+}
+
+function renderizarCategoriasResumen(gastosDelMes) {
+  const cont = document.getElementById('resumen-categorias');
+  cont.innerHTML = '';
+
+  const totalesPorCategoria = {};
+  gastosDelMes.forEach((g) => {
+    totalesPorCategoria[g.categoriaId] = (totalesPorCategoria[g.categoriaId] || 0) + g.monto;
+  });
+
+  const filas = Object.keys(totalesPorCategoria)
+    .map((catId) => ({ catId, total: totalesPorCategoria[catId] }))
+    .sort((a, b) => b.total - a.total);
+
+  if (filas.length === 0) {
+    cont.innerHTML = '<p class="placeholder">No hay gastos registrados este mes.</p>';
+    return;
+  }
+
+  const maxTotal = filas[0].total;
+
+  filas.forEach((f) => {
+    cont.appendChild(crearFilaCategoriaResumen(f.catId, f.total, maxTotal, gastosDelMes));
+  });
+}
+
+function crearFilaCategoriaResumen(catId, total, maxTotal, gastosDelMes) {
+  const categoria = obtenerCategoriaPorId(catId);
+  const nombre = categoria ? categoria.nombre : 'Categoría borrada';
+  const emoji = categoria ? categoria.emoji : '❓';
+  const color = categoria ? categoria.color : 'var(--color-texto-suave)';
+  const porcentajeAncho = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+
+  const fila = document.createElement('div');
+  fila.className = 'categoria-barra';
+
+  fila.innerHTML =
+    '<div class="categoria-barra__fila">' +
+    '<span class="categoria-barra__nombre">' + emoji + ' ' + nombre + '</span>' +
+    '<span class="categoria-barra__monto">' + formatearMonto(total) + '</span>' +
+    '</div>' +
+    '<div class="categoria-barra__track"><div class="categoria-barra__relleno" style="width:' + porcentajeAncho + '%;background:' + color + '"></div></div>';
+
+  const detalle = document.createElement('div');
+  detalle.className = 'categoria-barra__detalle';
+  detalle.hidden = true;
+
+  const totalesPorSub = {};
+  gastosDelMes
+    .filter((g) => g.categoriaId === catId)
+    .forEach((g) => {
+      const clave = g.subcategoriaId || '_sin';
+      totalesPorSub[clave] = (totalesPorSub[clave] || 0) + g.monto;
+    });
+
+  Object.keys(totalesPorSub)
+    .map((clave) => ({ clave, total: totalesPorSub[clave] }))
+    .sort((a, b) => b.total - a.total)
+    .forEach((s) => {
+      const sub = s.clave !== '_sin' && categoria ? obtenerSubcategoriaPorId(categoria, s.clave) : null;
+      const nombreSub = sub ? sub.nombre : 'Sin subcategoría';
+      const subfila = document.createElement('div');
+      subfila.className = 'categoria-barra__subfila';
+      subfila.innerHTML = '<span>' + nombreSub + '</span><span>' + formatearMonto(s.total) + '</span>';
+      detalle.appendChild(subfila);
+    });
+
+  fila.appendChild(detalle);
+  fila.querySelector('.categoria-barra__fila').addEventListener('click', () => {
+    detalle.hidden = !detalle.hidden;
+  });
+
+  return fila;
+}
+
+function renderizarGrafico12Meses() {
+  const cont = document.getElementById('grafico-12meses');
+  cont.innerHTML = '';
+
+  const ahora = new Date();
+  const meses = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
+    meses.push({ anio: d.getFullYear(), mes: d.getMonth() });
+  }
+
+  const totales = meses.map((m) => totalDelMes(m.anio, m.mes));
+  const maxTotal = Math.max.apply(null, totales);
+
+  meses.forEach((m, idx) => {
+    const total = totales[idx];
+    const alturaPct = maxTotal > 0 ? Math.max((total / maxTotal) * 100, total > 0 ? 6 : 0) : 0;
+    const activa = m.anio === resumenAnio && m.mes === resumenMes;
+    const nombreCorto = capitalizar(new Date(m.anio, m.mes, 1).toLocaleDateString('es-AR', { month: 'short' })).replace('.', '');
+
+    const barra = document.createElement('button');
+    barra.type = 'button';
+    barra.className = 'mes-barra' + (activa ? ' is-active' : '');
+    barra.innerHTML =
+      '<span class="mes-barra__track"><span class="mes-barra__relleno" style="height:' + alturaPct + '%"></span></span>' +
+      '<span class="mes-barra__label">' + nombreCorto + '</span>';
+    barra.addEventListener('click', () => {
+      resumenAnio = m.anio;
+      resumenMes = m.mes;
+      renderizarResumen();
+    });
+
+    cont.appendChild(barra);
+  });
 }
 
 /* =========================================================================
