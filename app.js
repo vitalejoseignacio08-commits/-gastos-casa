@@ -1070,7 +1070,7 @@ function renderizarResumen() {
 
   renderizarComparacionMensual(totalMes);
   renderizarPromedioDiario(totalMes);
-  renderizarCategoriasResumen(gastosDelMes);
+  renderizarCategoriasResumen(gastosDelMes, totalMes);
   renderizarGrafico12Meses();
 }
 
@@ -1101,7 +1101,7 @@ function renderizarPromedioDiario(totalActual) {
   document.getElementById('resumen-promedio').textContent = 'Promedio por día: ' + formatearMonto(promedio);
 }
 
-function renderizarCategoriasResumen(gastosDelMes) {
+function renderizarCategoriasResumen(gastosDelMes, totalMes) {
   const cont = document.getElementById('resumen-categorias');
   cont.innerHTML = '';
 
@@ -1114,6 +1114,8 @@ function renderizarCategoriasResumen(gastosDelMes) {
     .map((catId) => ({ catId, total: totalesPorCategoria[catId] }))
     .sort((a, b) => b.total - a.total);
 
+  renderizarDonaCategorias(filas, totalMes);
+
   if (filas.length === 0) {
     cont.innerHTML = '<p class="placeholder">No hay gastos registrados este mes.</p>';
     return;
@@ -1123,6 +1125,39 @@ function renderizarCategoriasResumen(gastosDelMes) {
 
   filas.forEach((f) => {
     cont.appendChild(crearFilaCategoriaResumen(f.catId, f.total, maxTotal, gastosDelMes));
+  });
+}
+
+function renderizarDonaCategorias(filas, totalMes) {
+  const svg = document.getElementById('dona-svg');
+  svg.querySelectorAll('circle.dona-segmento').forEach((c) => c.remove());
+  document.getElementById('dona-centro-monto').textContent = formatearMonto(totalMes);
+
+  if (!totalMes || totalMes <= 0 || filas.length === 0) return;
+
+  const radio = 40;
+  const circunferencia = 2 * Math.PI * radio;
+  let acumulado = 0;
+
+  filas.forEach((f) => {
+    const categoria = obtenerCategoriaPorId(f.catId);
+    const color = categoria ? categoria.color : 'var(--color-texto-suave)';
+    const largo = (f.total / totalMes) * circunferencia;
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', '50');
+    circle.setAttribute('cy', '50');
+    circle.setAttribute('r', String(radio));
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', color);
+    circle.setAttribute('stroke-width', '16');
+    circle.setAttribute('stroke-dasharray', largo + ' ' + (circunferencia - largo));
+    circle.setAttribute('stroke-dashoffset', String(-acumulado));
+    circle.setAttribute('transform', 'rotate(-90 50 50)');
+    circle.classList.add('dona-segmento');
+    svg.appendChild(circle);
+
+    acumulado += largo;
   });
 }
 
