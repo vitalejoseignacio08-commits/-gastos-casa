@@ -109,6 +109,7 @@ function iniciarApp() {
   configurarRegistrarGasto();
   configurarPantallaCategorias();
   configurarHistorial();
+  configurarResumen();
   configurarModalConfirmar();
   configurarAjustes();
   actualizarAvisoBackup();
@@ -1051,6 +1052,23 @@ function configurarHistorial() {
 
 let resumenAnio = hoyHistorial.getFullYear();
 let resumenMes = hoyHistorial.getMonth();
+
+function cambiarMesResumen(delta) {
+  resumenMes += delta;
+  if (resumenMes < 0) {
+    resumenMes = 11;
+    resumenAnio -= 1;
+  } else if (resumenMes > 11) {
+    resumenMes = 0;
+    resumenAnio += 1;
+  }
+  renderizarResumen();
+}
+
+function configurarResumen() {
+  document.getElementById('btn-resumen-mes-anterior').addEventListener('click', () => cambiarMesResumen(-1));
+  document.getElementById('btn-resumen-mes-siguiente').addEventListener('click', () => cambiarMesResumen(1));
+}
 
 function diasParaPromedio(anio, mes) {
   const hoy = new Date();

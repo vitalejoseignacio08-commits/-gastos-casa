@@ -71,7 +71,11 @@
 
   <section class="pantalla" id="pantalla-resumen" data-pantalla="resumen" hidden>
     <div class="resumen-total">
-      <span class="resumen-total__label" id="resumen-mes-label">—</span>
+      <div class="resumen-total__nav">
+        <button type="button" class="icon-btn icon-btn--grande" id="btn-resumen-mes-anterior" aria-label="Mes anterior">‹</button>
+        <span class="resumen-total__label" id="resumen-mes-label">—</span>
+        <button type="button" class="icon-btn icon-btn--grande" id="btn-resumen-mes-siguiente" aria-label="Mes siguiente">›</button>
+      </div>
       <span class="resumen-total__monto" id="resumen-total-monto">$ 0,00</span>
       <span class="resumen-total__comparacion" id="resumen-comparacion"></span>
       <span class="resumen-total__promedio" id="resumen-promedio"></span>
