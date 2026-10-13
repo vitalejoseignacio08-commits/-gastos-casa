@@ -6,7 +6,9 @@
 <title>Mis Gastos</title>
 
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#16a34a">
+<meta name="theme-color" content="#0d0f14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
 
 <!-- Android/Chrome -->
 <meta name="mobile-web-app-capable" content="yes">
@@ -18,16 +20,20 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <link rel="icon" href="icon-192.png">
+<!-- Tipografía: si no hay conexión (y todavía no quedó en cache) se usa la del sistema. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" crossorigin="anonymous">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header class="app-header">
   <div class="app-header__total">
-    <span class="app-header__total-label">Este mes</span>
+    <span class="app-header__total-label">Gastado este mes</span>
     <span class="app-header__total-monto" id="header-total-mes">$ 0,00</span>
   </div>
-  <button class="app-header__ajustes" id="btn-ajustes" type="button" aria-label="Ajustes">⚙️</button>
+  <button class="app-header__ajustes" id="btn-ajustes" type="button" aria-label="Ajustes"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
 </header>
 
 <main class="app-main" id="app-main">
@@ -35,7 +41,7 @@
   <section class="pantalla" id="pantalla-registrar" data-pantalla="registrar">
     <div class="fecha-selector">
       <span class="fecha-selector__label" id="fecha-label">Hoy</span>
-      <button class="fecha-selector__btn" id="btn-cambiar-fecha" type="button">Cambiar fecha</button>
+      <button class="fecha-selector__btn" id="btn-cambiar-fecha" type="button"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Cambiar fecha</button>
       <input type="date" id="input-fecha" class="fecha-selector__input" aria-hidden="true" tabindex="-1">
     </div>
 
@@ -55,18 +61,18 @@
       <button type="button" class="tecla" data-tecla="9">9</button>
       <button type="button" class="tecla" data-tecla=",">,</button>
       <button type="button" class="tecla" data-tecla="0">0</button>
-      <button type="button" class="tecla tecla--borrar" data-tecla="borrar" aria-label="Borrar">⌫</button>
+      <button type="button" class="tecla tecla--borrar" data-tecla="borrar" aria-label="Borrar"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="m12 9 6 6M18 9l-6 6"/></svg></button>
     </div>
   </section>
 
   <section class="pantalla" id="pantalla-historial" data-pantalla="historial" hidden>
     <div class="historial-header">
-      <button type="button" class="icon-btn icon-btn--grande" id="btn-mes-anterior" aria-label="Mes anterior">‹</button>
+      <button type="button" class="icon-btn icon-btn--grande" id="btn-mes-anterior" aria-label="Mes anterior"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
       <div class="historial-header__info">
         <span class="historial-header__mes" id="historial-mes-label">—</span>
         <span class="historial-header__total" id="historial-mes-total">$ 0,00</span>
       </div>
-      <button type="button" class="icon-btn icon-btn--grande" id="btn-mes-siguiente" aria-label="Mes siguiente">›</button>
+      <button type="button" class="icon-btn icon-btn--grande" id="btn-mes-siguiente" aria-label="Mes siguiente"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
     </div>
 
     <div id="historial-contenido"></div>
@@ -75,9 +81,9 @@
   <section class="pantalla" id="pantalla-resumen" data-pantalla="resumen" hidden>
     <div class="resumen-total">
       <div class="resumen-total__nav">
-        <button type="button" class="icon-btn icon-btn--grande" id="btn-resumen-mes-anterior" aria-label="Mes anterior">‹</button>
+        <button type="button" class="icon-btn icon-btn--grande" id="btn-resumen-mes-anterior" aria-label="Mes anterior"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
         <span class="resumen-total__label" id="resumen-mes-label">—</span>
-        <button type="button" class="icon-btn icon-btn--grande" id="btn-resumen-mes-siguiente" aria-label="Mes siguiente">›</button>
+        <button type="button" class="icon-btn icon-btn--grande" id="btn-resumen-mes-siguiente" aria-label="Mes siguiente"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
       </div>
       <span class="resumen-total__monto" id="resumen-total-monto">$ 0,00</span>
       <span class="resumen-total__comparacion" id="resumen-comparacion"></span>
@@ -103,7 +109,7 @@
   <section class="pantalla" id="pantalla-categorias" data-pantalla="categorias" hidden>
     <div class="categorias-header">
       <h2>Categorías</h2>
-      <button class="btn btn--primario btn--chico" id="btn-nueva-categoria" type="button">+ Nueva categoría</button>
+      <button class="btn btn--primario btn--chico" id="btn-nueva-categoria" type="button">+ Nueva</button>
     </div>
 
     <div id="lista-categorias"></div>
@@ -139,16 +145,16 @@
 
 <nav class="tabbar" id="tabbar">
   <button class="tabbar__item is-active" data-tab="registrar" type="button">
-    <span class="tabbar__icon">➕</span><span class="tabbar__label">Registrar</span>
+    <span class="tabbar__icon"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span><span class="tabbar__label">Registrar</span>
   </button>
   <button class="tabbar__item" data-tab="historial" type="button">
-    <span class="tabbar__icon">📅</span><span class="tabbar__label">Historial</span>
+    <span class="tabbar__icon"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.6"/></svg></span><span class="tabbar__label">Historial</span>
   </button>
   <button class="tabbar__item" data-tab="resumen" type="button">
-    <span class="tabbar__icon">📊</span><span class="tabbar__label">Resumen</span>
+    <span class="tabbar__icon"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg></span><span class="tabbar__label">Resumen</span>
   </button>
   <button class="tabbar__item" data-tab="categorias" type="button">
-    <span class="tabbar__icon">🏷️</span><span class="tabbar__label">Categorías</span>
+    <span class="tabbar__icon"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><span class="tabbar__label">Categorías</span>
   </button>
 </nav>
 
@@ -189,7 +195,7 @@
     <label class="campo-label" for="input-categoria-nombre">Nombre</label>
     <input type="text" id="input-categoria-nombre" class="input-texto" maxlength="30" placeholder="Ej: Mascotas">
 
-    <label class="campo-label">Emoji</label>
+    <label class="campo-label">Ícono</label>
     <div class="emoji-grid" id="emoji-grid"></div>
 
     <label class="campo-label">Color</label>

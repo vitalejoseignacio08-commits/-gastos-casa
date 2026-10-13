@@ -5,6 +5,8 @@ PWA para registrar gastos del hogar, pensada solo para celular. Se publica en Gi
 ## Restricciones técnicas (no negociables)
 
 - HTML, CSS y JavaScript puros. Sin frameworks, sin librerías externas, sin build, sin backend.
+  Única excepción: la tipografía Manrope se carga desde Google Fonts (`display=swap`); el service
+  worker la guarda en cache y, si no está disponible, se usa la fuente del sistema.
 - Archivos del proyecto: `index.html`, `app.js`, `styles.css`, `sw.js`, `manifest.webmanifest`,
   `icon-192.png`, `icon-512.png`.
 - Funciona 100% offline después de la primera carga. El service worker (`sw.js`) usa estrategia
@@ -29,7 +31,11 @@ PWA para registrar gastos del hogar, pensada solo para celular. Se publica en Gi
 
 - Nombre de la app (manifest, pantalla de inicio): **"Mis Gastos"**.
 - Navegación: pestañas abajo (Registrar, Historial, Resumen, Categorías) + ícono de Ajustes arriba.
-- Total del mes actual siempre visible arriba. Modo claro/oscuro según `prefers-color-scheme`.
+- Total del mes actual siempre visible arriba. Diseño oscuro como base, con variante clara según
+  `prefers-color-scheme`. Un solo color de acento (`--color-primario`) y colores suaves por categoría
+  (`--paleta-1` a `--paleta-10`; los datos guardan `var(--paleta-N)`, así que se ajustan desde CSS).
+- Las categorías guardan un emoji; la interfaz lo muestra como ícono SVG (`ICONOS_CATEGORIA` en
+  `app.js`) y cae al emoji si no hay ícono para ese emoji.
 - Categorías de ejemplo precargadas: Supermercado (Almacén, Carnicería, Verdulería, Limpieza),
   Servicios (Luz, Gas, Agua, Internet, Celular), Transporte (Combustible, Mantenimiento), Hogar,
   Salud (Farmacia, Consultas), Comida afuera, Ropa, Impuestos.

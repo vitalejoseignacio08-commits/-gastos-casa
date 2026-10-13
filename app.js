@@ -173,7 +173,87 @@ function totalDelMes(anio, mes) {
 function actualizarTotalHeader() {
   const hoy = new Date();
   const total = totalDelMes(hoy.getFullYear(), hoy.getMonth());
-  document.getElementById('header-total-mes').textContent = formatearMonto(total);
+  const el = document.getElementById('header-total-mes');
+  const texto = formatearMonto(total);
+  if (el.dataset.inicializado && el.textContent !== texto) animarElemento(el, 'actualizado', 500);
+  el.dataset.inicializado = '1';
+  el.textContent = texto;
+}
+
+/* =========================================================================
+   Íconos y microanimaciones (solo presentación)
+   ========================================================================= */
+
+// Las categorías guardan un emoji; acá se traduce a un ícono SVG para mostrarlo.
+// Si el emoji no tiene ícono (por ejemplo, de una copia importada) se muestra el emoji.
+const ICONOS_CATEGORIA = {
+  '🛒': '<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.9a1.5 1.5 0 0 0 1.5-1.1L21 7H6"/>',
+  '💡': '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>',
+  '🚗': '<path d="M5 17H3.5a1 1 0 0 1-1-1v-3.2a2 2 0 0 1 .6-1.4L5 9.5l1.6-3.6A1.5 1.5 0 0 1 8 5h8a1.5 1.5 0 0 1 1.4.9L19 9.5l1.9 1.9a2 2 0 0 1 .6 1.4V16a1 1 0 0 1-1 1H19"/><path d="M9 17h6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 9.5h14"/>',
+  '🏠': '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v10.5a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/>',
+  '🩺': '<path d="M20.4 12.6 12 21l-8.4-8.4a5 5 0 0 1 7.1-7.1L12 6.8l1.3-1.3a5 5 0 0 1 7.1 7.1z"/><path d="M6.5 12.5h2.5l1.5-2.5 2.5 5 1.5-2.5h3"/>',
+  '🍔': '<path d="M7 3v8"/><path d="M4.5 3v5a2.5 2.5 0 0 0 5 0V3"/><path d="M7 11v10"/><path d="M17 21V3c-2.2 1.2-3.5 3.8-3.5 7v3H17"/>',
+  '👕': '<path d="M8 3 3 6l2 4.5 2.5-1V21h9V9.5l2.5 1L21 6l-5-3a4 4 0 0 1-8 0z"/>',
+  '🧾': '<path d="M5 3h14v18l-2.3-1.5L14.3 21 12 19.5 9.7 21l-2.4-1.5L5 21z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/>',
+  '🎓': '<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/><path d="M22 9.5V15"/>',
+  '🎉': '<path d="M4 20 8.5 7.5l8 8z"/><path d="M14 4.5c.7 1 .7 2.3 0 3.3"/><path d="M19.5 10c-1-.7-2.3-.7-3.3 0"/><path d="M17 3v1"/><path d="M21 7h-1"/>',
+  '🐾': '<circle cx="6.5" cy="10" r="1.8"/><circle cx="10" cy="5.5" r="1.8"/><circle cx="14.5" cy="5.5" r="1.8"/><circle cx="18" cy="10" r="1.8"/><path d="M12 11.5c-2.5 0-5.5 3.5-5.5 6a2.5 2.5 0 0 0 3.2 2.4c1-.3 1.6-.5 2.3-.5s1.3.2 2.3.5a2.5 2.5 0 0 0 3.2-2.4c0-2.5-3-6-5.5-6z"/>',
+  '📱': '<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  '💳': '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/>',
+  '🎁': '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M12 8v13"/><path d="M12 8C10.5 4 7 4 7 6s2.5 2 5 2c2.5 0 5 0 5-2s-3.5-2-5 2z"/>',
+  '⚽': '<circle cx="12" cy="12" r="9"/><path d="m12 7.5 4 2.9-1.5 4.6h-5L8 10.4z"/><path d="M12 3v4.5M16 10.4l4.3-1.4M14.5 15l2.6 3.8M9.5 15l-2.6 3.8M8 10.4 3.7 9"/>',
+  '🎬': '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+  '✈': '<path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M21 3 10 13"/>',
+  '🍺': '<path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 10h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-4c.6-.9 1.6-1.5 2.7-1.5 1.5 0 2.7 1 3 2.3A2 2 0 0 1 15 8"/><path d="M8.5 12v5M11.5 12v5"/>',
+  '☕': '<path d="M4 9h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c-.5 1 .5 1.5 0 2.5M12 3c-.5 1 .5 1.5 0 2.5"/>',
+  '🧹': '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  '🔧': '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+  '📚': '<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M8 7h8"/>',
+  '🏥': '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  '🚌': '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16"/><path d="M8 14.5h.01M16 14.5h.01" stroke-width="2.6"/><path d="M7 18v3M17 18v3"/>',
+  '❓': '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><path d="M12 17h.01" stroke-width="2.6"/>',
+};
+
+const ICONOS_UI = {
+  editar: '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"/>',
+  borrar: '<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V7"/>',
+};
+
+function svgIcono(contenido) {
+  return '<svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + contenido + '</svg>';
+}
+
+function htmlIconoEmoji(emoji) {
+  const clave = String(emoji || '❓').replace(/️/g, '');
+  const trazo = ICONOS_CATEGORIA[clave];
+  return trazo ? svgIcono(trazo) : '<span class="icono-emoji">' + emoji + '</span>';
+}
+
+function htmlChipCategoria(categoria, chico) {
+  const emoji = categoria ? categoria.emoji : '❓';
+  const color = categoria ? categoria.color : 'var(--color-texto-suave)';
+  return '<span class="cat-chip' + (chico ? ' cat-chip--chico' : '') + '" style="--cat:' + color + '">' +
+    htmlIconoEmoji(emoji) + '</span>';
+}
+
+// Reinicia una animación CSS aunque ya se esté reproduciendo.
+function animarElemento(el, clase, duracionMs) {
+  if (!el) return;
+  el.classList.remove(clase);
+  void el.offsetWidth;
+  el.classList.add(clase);
+  setTimeout(() => el.classList.remove(clase), duracionMs || 600);
+}
+
+// Anima la salida de un elemento y después vuelve a dibujar la pantalla.
+function animarSalidaYRenderizar(el, renderizar) {
+  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    renderizar();
+    return;
+  }
+  el.classList.add('saliendo');
+  setTimeout(renderizar, 260);
 }
 
 /* =========================================================================
@@ -201,6 +281,9 @@ function mostrarToast(mensaje, accionTexto, accionCallback) {
     accionEl.onclick = null;
   }
 
+  // Ocultar y volver a mostrar reinicia la animación de entrada si ya estaba visible.
+  toast.hidden = true;
+  void toast.offsetWidth;
   toast.hidden = false;
 
   if (toastTimeout) clearTimeout(toastTimeout);
@@ -235,6 +318,7 @@ function irAPantalla(nombre) {
   document.querySelectorAll('.tabbar__item').forEach((el) => {
     el.classList.toggle('is-active', el.dataset.tab === nombre);
   });
+  document.getElementById('btn-ajustes').classList.toggle('is-active', nombre === 'ajustes');
 
   if (nombre === 'historial') {
     renderizarHistorial();
@@ -279,8 +363,9 @@ function parsearBufferMonto(buffer) {
 
 function actualizarDisplayMonto() {
   const el = document.getElementById('monto-display');
-  const texto = '$ ' + formatearBufferMonto(bufferMonto);
-  el.textContent = texto;
+  const numero = formatearBufferMonto(bufferMonto);
+  const texto = '$ ' + numero;
+  el.innerHTML = '<span class="monto-display__moneda">$</span>' + numero;
   el.classList.toggle('monto-display--mediano', texto.length > 10 && texto.length <= 13);
   el.classList.toggle('monto-display--chico', texto.length > 13);
 }
@@ -322,10 +407,10 @@ function renderizarCategoriasRegistro() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'categoria-card';
-      btn.style.setProperty('--categoria-color', cat.color);
+      btn.style.setProperty('--cat', cat.color);
       btn.dataset.categoriaId = cat.id;
       btn.innerHTML =
-        '<span class="categoria-card__emoji">' + cat.emoji + '</span>' +
+        htmlChipCategoria(cat) +
         '<span class="categoria-card__nombre">' + cat.nombre + '</span>';
       cont.appendChild(btn);
     });
@@ -426,7 +511,19 @@ function deshacerGasto(id) {
 }
 
 function configurarRegistrarGasto() {
-  document.getElementById('teclado-numerico').addEventListener('click', (ev) => {
+  const teclado = document.getElementById('teclado-numerico');
+  // Feedback visual inmediato al apoyar el dedo (en iOS :active no siempre se dispara).
+  teclado.addEventListener('pointerdown', (ev) => {
+    const boton = ev.target.closest('.tecla');
+    if (boton) boton.classList.add('is-pressed');
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach((tipo) => {
+    teclado.addEventListener(tipo, () => {
+      teclado.querySelectorAll('.tecla.is-pressed').forEach((el) => el.classList.remove('is-pressed'));
+    });
+  });
+
+  teclado.addEventListener('click', (ev) => {
     const boton = ev.target.closest('.tecla');
     if (!boton || !estado) return;
     const tecla = boton.dataset.tecla;
@@ -452,6 +549,7 @@ function configurarRegistrarGasto() {
   document.getElementById('grid-categorias').addEventListener('click', (ev) => {
     const tarjeta = ev.target.closest('.categoria-card');
     if (!tarjeta || !estado) return;
+    animarElemento(tarjeta, 'pulso', 400);
     onTocarCategoria(tarjeta.dataset.categoriaId);
   });
 
@@ -543,7 +641,7 @@ function renderizarPantallaCategorias() {
     if (cat.oculta) {
       const fila = document.createElement('div');
       fila.className = 'oculto-fila';
-      fila.innerHTML = '<span>' + cat.emoji + ' ' + cat.nombre + '</span>';
+      fila.innerHTML = '<span>' + htmlChipCategoria(cat, true) + cat.nombre + '</span>';
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'oculto-fila__btn';
@@ -590,10 +688,10 @@ function crearFilaCategoria(cat) {
   const cabecera = document.createElement('div');
   cabecera.className = 'categoria-row__cabecera';
   cabecera.innerHTML =
-    '<span class="categoria-row__swatch" style="background:' + cat.color + '">' + cat.emoji + '</span>' +
+    htmlChipCategoria(cat) +
     '<span class="categoria-row__nombre">' + cat.nombre + '</span>' +
-    '<button type="button" class="icon-btn btn-editar-categoria" aria-label="Editar categoría">✏️</button>' +
-    '<button type="button" class="icon-btn btn-borrar-categoria" aria-label="Borrar categoría">🗑️</button>';
+    '<button type="button" class="icon-btn btn-editar-categoria" aria-label="Editar categoría">' + svgIcono(ICONOS_UI.editar) + '</button>' +
+    '<button type="button" class="icon-btn icon-btn--peligro btn-borrar-categoria" aria-label="Borrar categoría">' + svgIcono(ICONOS_UI.borrar) + '</button>';
   fila.appendChild(cabecera);
 
   const subs = document.createElement('div');
@@ -607,8 +705,8 @@ function crearFilaCategoria(cat) {
       filaSub.dataset.subId = sub.id;
       filaSub.innerHTML =
         '<span>' + sub.nombre + '</span>' +
-        '<button type="button" class="icon-btn btn-editar-subcategoria" aria-label="Editar subcategoría">✏️</button>' +
-        '<button type="button" class="icon-btn btn-borrar-subcategoria" aria-label="Borrar subcategoría">🗑️</button>';
+        '<button type="button" class="icon-btn btn-editar-subcategoria" aria-label="Editar subcategoría">' + svgIcono(ICONOS_UI.editar) + '</button>' +
+        '<button type="button" class="icon-btn icon-btn--peligro btn-borrar-subcategoria" aria-label="Borrar subcategoría">' + svgIcono(ICONOS_UI.borrar) + '</button>';
       subs.appendChild(filaSub);
     });
 
@@ -629,7 +727,7 @@ function renderEmojiGrid() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'emoji-opcion' + (emoji === emojiSeleccionado ? ' is-active' : '');
-    btn.textContent = emoji;
+    btn.innerHTML = htmlIconoEmoji(emoji);
     btn.addEventListener('click', () => {
       emojiSeleccionado = emoji;
       cont.querySelectorAll('.emoji-opcion').forEach((el) => el.classList.remove('is-active'));
@@ -683,14 +781,16 @@ function guardarCategoria() {
     return;
   }
 
+  let idGuardado = categoriaEnEdicionId;
   if (categoriaEnEdicionId) {
     const categoria = estado.categorias.find((c) => c.id === categoriaEnEdicionId);
     categoria.nombre = nombre;
     categoria.emoji = emojiSeleccionado;
     categoria.color = colorSeleccionado;
   } else {
+    idGuardado = generarId();
     estado.categorias.push({
-      id: generarId(),
+      id: idGuardado,
       nombre,
       emoji: emojiSeleccionado,
       color: colorSeleccionado,
@@ -703,6 +803,18 @@ function guardarCategoria() {
   cerrarPanelCategoria();
   renderizarPantallaCategorias();
   renderizarCategoriasRegistro();
+  resaltarFilaCategoria(idGuardado);
+}
+
+function filaCategoriaPorId(catId) {
+  return document.querySelector('.categoria-row[data-cat-id="' + CSS.escape(catId) + '"]');
+}
+
+function resaltarFilaCategoria(catId) {
+  const fila = filaCategoriaPorId(catId);
+  if (!fila) return;
+  fila.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  animarElemento(fila, 'resaltado', 1200);
 }
 
 function borrarCategoria(catId) {
@@ -721,8 +833,8 @@ function borrarCategoria(catId) {
       estado.categorias = estado.categorias.filter((c) => c.id !== catId);
     }
     guardarEstado(estado);
-    renderizarPantallaCategorias();
     renderizarCategoriasRegistro();
+    animarSalidaYRenderizar(filaCategoriaPorId(catId), renderizarPantallaCategorias);
   });
 }
 
@@ -760,6 +872,7 @@ function guardarSubcategoria() {
   cerrarPanelSubcat();
   renderizarPantallaCategorias();
   renderizarCategoriasRegistro();
+  resaltarFilaCategoria(categoria.id);
 }
 
 function borrarSubcategoria(categoriaId, subcategoriaId) {
@@ -779,8 +892,10 @@ function borrarSubcategoria(categoriaId, subcategoriaId) {
       categoria.subcategorias = categoria.subcategorias.filter((s) => s.id !== subcategoriaId);
     }
     guardarEstado(estado);
-    renderizarPantallaCategorias();
     renderizarCategoriasRegistro();
+    const filaCat = filaCategoriaPorId(categoriaId);
+    const filaSub = filaCat ? filaCat.querySelector('.subcategoria-row[data-sub-id="' + CSS.escape(subcategoriaId) + '"]') : null;
+    animarSalidaYRenderizar(filaSub, renderizarPantallaCategorias);
   });
 }
 
@@ -906,7 +1021,6 @@ function renderizarHistorial() {
         const categoria = obtenerCategoriaPorId(g.categoriaId);
         const sub = obtenerSubcategoriaPorId(categoria, g.subcategoriaId);
         const nombreCategoria = categoria ? categoria.nombre : 'Categoría borrada';
-        const emoji = categoria ? categoria.emoji : '❓';
         const etiquetaCategoria = sub ? nombreCategoria + ' › ' + sub.nombre : nombreCategoria;
 
         const item = document.createElement('button');
@@ -914,7 +1028,7 @@ function renderizarHistorial() {
         item.className = 'gasto-item';
         item.dataset.gastoId = g.id;
         item.innerHTML =
-          '<span class="gasto-item__emoji">' + emoji + '</span>' +
+          htmlChipCategoria(categoria) +
           '<span class="gasto-item__info">' +
           '<span class="gasto-item__categoria">' + etiquetaCategoria + '</span>' +
           (g.nota ? '<span class="gasto-item__nota">' + g.nota + '</span>' : '') +
@@ -1019,6 +1133,12 @@ function guardarEdicionGasto() {
   renderizarHistorial();
   actualizarTotalHeader();
   mostrarToast('Gasto actualizado');
+
+  const item = itemGastoPorId(gasto.id);
+  if (item) {
+    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    animarElemento(item, 'resaltado', 1200);
+  }
 }
 
 function borrarGastoEnEdicion() {
@@ -1027,10 +1147,14 @@ function borrarGastoEnEdicion() {
     estado.gastos = estado.gastos.filter((g) => g.id !== id);
     guardarEstado(estado);
     cerrarPanelEditarGasto();
-    renderizarHistorial();
     actualizarTotalHeader();
     mostrarToast('Gasto borrado');
+    animarSalidaYRenderizar(itemGastoPorId(id), renderizarHistorial);
   });
+}
+
+function itemGastoPorId(id) {
+  return document.querySelector('.gasto-item[data-gasto-id="' + CSS.escape(id) + '"]');
 }
 
 function configurarHistorial() {
@@ -1193,7 +1317,6 @@ function renderizarDonaCategorias(filas, totalMes) {
 function crearFilaCategoriaResumen(catId, total, maxTotal, gastosDelMes) {
   const categoria = obtenerCategoriaPorId(catId);
   const nombre = categoria ? categoria.nombre : 'Categoría borrada';
-  const emoji = categoria ? categoria.emoji : '❓';
   const color = categoria ? categoria.color : 'var(--color-texto-suave)';
   const porcentajeAncho = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
 
@@ -1202,7 +1325,7 @@ function crearFilaCategoriaResumen(catId, total, maxTotal, gastosDelMes) {
 
   fila.innerHTML =
     '<div class="categoria-barra__fila">' +
-    '<span class="categoria-barra__nombre">' + emoji + ' ' + nombre + '</span>' +
+    '<span class="categoria-barra__nombre">' + htmlChipCategoria(categoria, true) + nombre + '</span>' +
     '<span class="categoria-barra__monto">' + formatearMonto(total) + '</span>' +
     '</div>' +
     '<div class="categoria-barra__track"><div class="categoria-barra__relleno" style="width:' + porcentajeAncho + '%;background:' + color + '"></div></div>';
