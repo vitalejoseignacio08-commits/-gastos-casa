@@ -107,6 +107,7 @@ function iniciarApp() {
   actualizarTotalHeader();
   configurarNavegacion();
   configurarMangometro();
+  configurarRacha();
   configurarRegistrarGasto();
   configurarPantallaCategorias();
   configurarHistorial();
@@ -182,8 +183,27 @@ function actualizarTotalHeader() {
   // Achicar la letra si el total es largo, para que no choque con el botón de Ajustes.
   el.classList.toggle('app-header__total-monto--mediano', texto.length > 12 && texto.length <= 14);
   el.classList.toggle('app-header__total-monto--chico', texto.length > 14);
+  ajustarTotalAlAncho();
   actualizarMangometro();
+  actualizarRacha();
+  actualizarBotonRegistrar();
 }
+
+// Si el total no entra en el espacio libre del encabezado (celulares angostos
+// o montos muy largos), se achica la letra de a un píxel hasta que entre.
+function ajustarTotalAlAncho() {
+  const el = document.getElementById('header-total-mes');
+  el.style.fontSize = '';
+  let tamano = parseFloat(getComputedStyle(el).fontSize);
+  while (el.scrollWidth > el.clientWidth && tamano > 14) {
+    tamano -= 1;
+    el.style.fontSize = tamano + 'px';
+  }
+}
+
+window.addEventListener('resize', () => ajustarTotalAlAncho());
+// La tipografía puede terminar de cargar después: recalcular con el ancho real.
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ajustarTotalAlAncho());
 
 /* =========================================================================
    Mangómetro: el mango del encabezado se llena franja por franja según lo
@@ -235,6 +255,143 @@ function actualizarMangometro() {
   });
   boton.classList.toggle('is-excedido', d.proporcion !== null && d.proporcion > 1);
   boton.setAttribute('aria-label', 'Mangómetro: ' + mensajeMangometro(d));
+}
+
+/* =========================================================================
+   Racha: días seguidos "al mango". Un día cuenta si tiene al menos un gasto
+   o si se marcó "Hoy no gasté" (config.diasSinGastos). La racha de hoy no se
+   corta hasta que termina el día.
+   ========================================================================= */
+
+const ICONO_CHECK = '<path d="M5 12.5l4.5 4.5L19 7.5"/>';
+const ICONO_FLECHA = '<path d="M5 12h14M13 6l6 6-6 6"/>';
+
+function listaDiasSinGastos() {
+  if (!estado || !estado.config || !Array.isArray(estado.config.diasSinGastos)) return [];
+  return estado.config.diasSinGastos;
+}
+
+function diasCubiertos() {
+  const dias = new Set(listaDiasSinGastos());
+  if (estado) estado.gastos.forEach((g) => dias.add(g.fecha));
+  return dias;
+}
+
+function diaCubierto(fechaISO) {
+  return diasCubiertos().has(fechaISO);
+}
+
+function sumarDias(fechaISO, delta) {
+  const [y, m, d] = fechaISO.split('-').map(Number);
+  return formatearFechaISO(new Date(y, m - 1, d + delta));
+}
+
+function calcularRacha() {
+  const dias = diasCubiertos();
+  const hoy = formatearFechaISO(new Date());
+  const hoyCubierto = dias.has(hoy);
+  // Si hoy todavía no está cubierto, la racha se cuenta hasta ayer.
+  let dia = hoyCubierto ? hoy : sumarDias(hoy, -1);
+  let actual = 0;
+  while (dias.has(dia)) {
+    actual += 1;
+    dia = sumarDias(dia, -1);
+  }
+
+  let mejor = 0;
+  let seguidos = 0;
+  let anterior = null;
+  Array.from(dias)
+    .filter((f) => f <= hoy)
+    .sort()
+    .forEach((f) => {
+      seguidos = anterior && sumarDias(anterior, 1) === f ? seguidos + 1 : 1;
+      mejor = Math.max(mejor, seguidos);
+      anterior = f;
+    });
+
+  return { actual, mejor: Math.max(mejor, actual), hoyCubierto };
+}
+
+function textoDias(n) {
+  return n + (n === 1 ? ' día' : ' días');
+}
+
+function mensajeRacha(r) {
+  if (r.actual === 0) {
+    return 'Anotá un gasto o marcá "Hoy no gasté" para empezar tu racha.';
+  }
+  if (!r.hoyCubierto) {
+    return 'Llevás ' + textoDias(r.actual) + ' al mango. Anotá un gasto o marcá "Hoy no gasté" para no cortar la racha.';
+  }
+  const mejor = r.mejor > r.actual ? ' Tu mejor racha: ' + textoDias(r.mejor) + '.' : ' ¡Es tu mejor racha!';
+  return 'Llevás ' + textoDias(r.actual) + ' seguidos al mango.' + (r.actual > 1 ? mejor : '');
+}
+
+function actualizarRacha() {
+  const boton = document.getElementById('racha');
+  if (!boton) return;
+  const r = calcularRacha();
+  const numero = document.getElementById('racha-dias');
+  if (numero.textContent !== String(r.actual) && boton.dataset.inicializado) {
+    animarElemento(boton, 'actualizado', 500);
+  }
+  boton.dataset.inicializado = '1';
+  numero.textContent = r.actual;
+  boton.classList.toggle('is-activa', r.hoyCubierto);
+  boton.setAttribute('aria-label', 'Racha: ' + mensajeRacha(r));
+}
+
+// "Hoy no gasté" solo se ofrece con el monto en 0, para un día que todavía no
+// tiene gastos ni está marcado, y que no sea futuro.
+function puedeMarcarSinGastos() {
+  if (!estado || parsearBufferMonto(bufferMonto) > 0) return false;
+  if (fechaSeleccionada > formatearFechaISO(new Date())) return false;
+  return !diaCubierto(fechaSeleccionada);
+}
+
+function actualizarBotonRegistrar() {
+  const boton = document.getElementById('btn-elegir-categoria');
+  if (!boton) return;
+  const sinMonto = parsearBufferMonto(bufferMonto) <= 0;
+  const sinGastos = puedeMarcarSinGastos();
+  const esHoy = fechaSeleccionada === formatearFechaISO(new Date());
+  const html = sinGastos
+    ? (esHoy ? 'Hoy no gasté' : 'No gasté ese día') + svgIcono(ICONO_CHECK)
+    : 'Elegir categoría' + svgIcono(ICONO_FLECHA);
+  if (boton.dataset.html !== html) {
+    boton.innerHTML = html;
+    boton.dataset.html = html;
+  }
+  boton.classList.toggle('is-sin-gasto', sinGastos);
+  boton.classList.toggle('is-vacio', sinMonto && !sinGastos);
+}
+
+function marcarDiaSinGastos() {
+  const fecha = fechaSeleccionada;
+  if (!estado.config) estado.config = { ultimaBackup: null };
+  if (!Array.isArray(estado.config.diasSinGastos)) estado.config.diasSinGastos = [];
+  estado.config.diasSinGastos.push(fecha);
+  guardarEstado(estado);
+  actualizarTotalHeader();
+  animarGuardado();
+  const r = calcularRacha();
+  const texto = fecha === formatearFechaISO(new Date())
+    ? 'Día sin gastos anotado. Racha: ' + textoDias(r.actual) + ' 🔥'
+    : 'Día marcado sin gastos.';
+  mostrarToast(texto, 'Deshacer', () => desmarcarDiaSinGastos(fecha));
+}
+
+function desmarcarDiaSinGastos(fecha) {
+  estado.config.diasSinGastos = listaDiasSinGastos().filter((f) => f !== fecha);
+  guardarEstado(estado);
+  actualizarTotalHeader();
+}
+
+function configurarRacha() {
+  document.getElementById('racha').addEventListener('click', () => {
+    mostrarToast(mensajeRacha(calcularRacha()));
+  });
 }
 
 function configurarMangometro() {
@@ -431,10 +588,14 @@ function actualizarDisplayMonto() {
   el.innerHTML = '<span class="monto-display__moneda">$</span>' + numero;
   el.classList.toggle('monto-display--mediano', texto.length > 10 && texto.length <= 13);
   el.classList.toggle('monto-display--chico', texto.length > 13);
-  document.getElementById('btn-elegir-categoria').classList.toggle('is-vacio', parsearBufferMonto(bufferMonto) <= 0);
+  actualizarBotonRegistrar();
 }
 
 function abrirPanelElegirCategoria() {
+  if (puedeMarcarSinGastos()) {
+    marcarDiaSinGastos();
+    return;
+  }
   if (parsearBufferMonto(bufferMonto) <= 0) {
     shakeMonto();
     return;
@@ -467,11 +628,12 @@ function actualizarLabelFecha() {
   const label = document.getElementById('fecha-label');
   if (fechaSeleccionada === hoyISO) {
     label.textContent = 'Hoy';
-    return;
+  } else {
+    const [y, m, d] = fechaSeleccionada.split('-').map(Number);
+    const fecha = new Date(y, m - 1, d);
+    label.textContent = fecha.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
   }
-  const [y, m, d] = fechaSeleccionada.split('-').map(Number);
-  const fecha = new Date(y, m - 1, d);
-  label.textContent = fecha.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+  actualizarBotonRegistrar();
 }
 
 function renderizarCategoriasRegistro() {
@@ -570,6 +732,10 @@ function guardarGasto(categoriaId, subcategoriaId, nota) {
   };
 
   estado.gastos.push(gasto);
+  // Si ese día estaba marcado como "sin gastos", la marca ya no corresponde.
+  if (listaDiasSinGastos().includes(gasto.fecha)) {
+    estado.config.diasSinGastos = listaDiasSinGastos().filter((f) => f !== gasto.fecha);
+  }
   guardarEstado(estado);
   actualizarTotalHeader();
 

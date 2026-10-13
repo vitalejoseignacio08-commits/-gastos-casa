@@ -38,6 +38,12 @@ PWA para registrar gastos del hogar, pensada solo para celular. Se publica en Gi
 - Mangómetro: en el encabezado, el mango del logo (11 franjas) se llena de abajo hacia arriba según
   lo gastado este mes comparado con el total del mes anterior; si lo supera, queda lleno en tono
   rojizo. Al tocarlo, un aviso explica el porcentaje. Sin datos del mes anterior queda vacío.
+- Racha: pastilla con llama en el encabezado (junto a Ajustes) con los días seguidos "al mango". Un
+  día cuenta si tiene al menos un gasto o está marcado como sin gastos; si hoy todavía no está
+  cubierto, la racha se cuenta hasta ayer (no se corta hasta que termina el día).
+- "Hoy no gasté": con el monto en 0 y un día (hoy o pasado) sin gastos ni marca, el botón de
+  Registrar ofrece "Hoy no gasté" / "No gasté ese día" en lugar de "Elegir categoría". Si después se
+  anota un gasto en un día marcado, la marca se quita.
 - Navegación: pestañas abajo (Registrar, Historial, Resumen, Categorías) + ícono de Ajustes arriba.
 - Registrar en dos pasos: la pantalla tiene solo fecha, monto y teclado grande + botón "Elegir
   categoría"; ese botón abre un panel inferior con todas las categorías en grilla (si el monto es 0,
@@ -77,7 +83,8 @@ PWA para registrar gastos del hogar, pensada solo para celular. Se publica en Gi
     }
   ],
   config: {
-    ultimaBackup   // ISO date o null, se actualiza al exportar JSON/CSV
+    ultimaBackup,  // ISO date o null, se actualiza al exportar JSON/CSV
+    diasSinGastos  // ["YYYY-MM-DD"], días marcados con "Hoy no gasté" (opcional: si falta, es [])
   }
 }
 ```
