@@ -47,8 +47,6 @@
 
     <div class="monto-display" id="monto-display">$ 0</div>
 
-    <div class="grid-categorias" id="grid-categorias"></div>
-
     <div class="teclado-numerico" id="teclado-numerico">
       <button type="button" class="tecla" data-tecla="1">1</button>
       <button type="button" class="tecla" data-tecla="2">2</button>
@@ -63,6 +61,11 @@
       <button type="button" class="tecla" data-tecla="0">0</button>
       <button type="button" class="tecla tecla--borrar" data-tecla="borrar" aria-label="Borrar"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="m12 9 6 6M18 9l-6 6"/></svg></button>
     </div>
+
+    <button type="button" class="btn btn--primario btn-elegir-categoria is-vacio" id="btn-elegir-categoria">
+      Elegir categoría
+      <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
   </section>
 
   <section class="pantalla" id="pantalla-historial" data-pantalla="historial" hidden>
@@ -172,6 +175,19 @@
     <div class="modal__acciones">
       <button class="btn btn--secundario" id="modal-error-copiar" type="button">Copiar contenido</button>
       <button class="btn btn--peligro" id="modal-error-reiniciar" type="button">Empezar de nuevo (borra lo dañado)</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="panel-elegir-categoria" hidden>
+  <div class="modal">
+    <div class="panel-elegir__cabecera">
+      <h2>¿En qué gastaste?</h2>
+      <span class="panel-elegir__monto" id="panel-elegir-monto">$ 0</span>
+    </div>
+    <div class="grid-categorias" id="grid-categorias"></div>
+    <div class="modal__acciones">
+      <button class="btn btn--secundario" id="btn-elegir-cancelar" type="button">Cancelar</button>
     </div>
   </div>
 </div>

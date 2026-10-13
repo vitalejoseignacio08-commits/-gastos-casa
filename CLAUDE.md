@@ -31,6 +31,9 @@ PWA para registrar gastos del hogar, pensada solo para celular. Se publica en Gi
 
 - Nombre de la app (manifest, pantalla de inicio): **"Mis Gastos"**.
 - Navegación: pestañas abajo (Registrar, Historial, Resumen, Categorías) + ícono de Ajustes arriba.
+- Registrar en dos pasos: la pantalla tiene solo fecha, monto y teclado grande + botón "Elegir
+  categoría"; ese botón abre un panel inferior con todas las categorías en grilla (si el monto es 0,
+  el monto se sacude y no se abre). Después sigue el panel de subcategoría/nota como siempre.
 - Total del mes actual siempre visible arriba. Diseño oscuro como base, con variante clara según
   `prefers-color-scheme`. Un solo color de acento (`--color-primario`) y colores suaves por categoría
   (`--paleta-1` a `--paleta-10`; los datos guardan `var(--paleta-N)`, así que se ajustan desde CSS).

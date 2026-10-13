@@ -286,12 +286,17 @@ h2 {
   pointer-events: none;
 }
 
+/* El monto ocupa el espacio libre entre la fecha y el teclado, centrado. */
 .monto-display {
-  flex-shrink: 0;
-  font-size: 3.2rem;
+  flex: 1;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.6rem;
   font-weight: 800;
   text-align: center;
-  margin: 6px 0 14px;
+  margin: 4px 0 12px;
   letter-spacing: -0.04em;
   line-height: 1.15;
   white-space: nowrap;
@@ -309,11 +314,11 @@ h2 {
 
 /* Achicar la letra cuando el monto es largo para que no se corte. */
 .monto-display--mediano {
-  font-size: 2.6rem;
+  font-size: 2.8rem;
 }
 
 .monto-display--chico {
-  font-size: 2.1rem;
+  font-size: 2.2rem;
 }
 
 .monto-display.guardado-ok {
@@ -321,48 +326,81 @@ h2 {
   animation: guardado 0.45s var(--ease-rebote);
 }
 
-.grid-categorias {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: min-content;
-  align-content: start;
+.btn-elegir-categoria {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  /* Margen interno para que la animación al tocar no quede recortada. */
-  padding: 2px;
-  margin: 0 -2px 12px;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 12px;
+  font-size: 1.05rem;
+  border-radius: var(--radio);
+  transition: transform 0.15s var(--ease), background 0.25s, color 0.25s, filter 0.2s;
+}
+
+.btn-elegir-categoria .icono {
+  width: 20px;
+  height: 20px;
+}
+
+/* Sin monto el botón se ve apagado (al tocarlo, el monto se sacude). */
+.btn-elegir-categoria.is-vacio {
+  background: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+}
+
+.panel-elegir__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel-elegir__cabecera h2 {
+  margin: 0;
+}
+
+.panel-elegir__monto {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-primario);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Grilla del panel "¿En qué gastaste?": todas las categorías a la vista. */
+.grid-categorias {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
 .categoria-card {
   --cat: var(--paleta-5);
-  background: var(--color-superficie);
+  background: var(--color-superficie-2);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio);
-  padding: 10px 3px 9px;
+  padding: 14px 6px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  min-height: 82px;
+  gap: 8px;
+  min-height: 100px;
   transition: transform 0.15s var(--ease), background 0.2s;
 }
 
 .categoria-card:active {
   transform: scale(0.94);
-  background: color-mix(in srgb, var(--cat) 12%, var(--color-superficie));
-}
-
-.categoria-card.pulso {
-  animation: pulso 0.4s var(--ease);
+  background: color-mix(in srgb, var(--cat) 14%, var(--color-superficie-2));
 }
 
 .categoria-card__nombre {
   max-width: 100%;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-align: center;
   line-height: 1.15;
@@ -376,6 +414,13 @@ h2 {
   -webkit-hyphens: auto;
   hyphens: auto;
   overflow-wrap: break-word;
+}
+
+.categoria-card .cat-chip {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  font-size: 1.3rem;
 }
 
 /* Ícono de categoría dentro de un círculo con el color suave de la categoría. */
@@ -411,7 +456,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: clamp(50px, 8vh, 68px);
+  min-height: clamp(54px, 9vh, 76px);
   background: var(--color-superficie);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio);
@@ -1446,12 +1491,6 @@ select.input-texto {
 @keyframes guardado {
   0% { transform: scale(1); }
   35% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-@keyframes pulso {
-  0% { transform: scale(1); }
-  40% { transform: scale(0.93); }
   100% { transform: scale(1); }
 }
 

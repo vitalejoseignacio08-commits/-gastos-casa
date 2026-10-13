@@ -368,6 +368,20 @@ function actualizarDisplayMonto() {
   el.innerHTML = '<span class="monto-display__moneda">$</span>' + numero;
   el.classList.toggle('monto-display--mediano', texto.length > 10 && texto.length <= 13);
   el.classList.toggle('monto-display--chico', texto.length > 13);
+  document.getElementById('btn-elegir-categoria').classList.toggle('is-vacio', parsearBufferMonto(bufferMonto) <= 0);
+}
+
+function abrirPanelElegirCategoria() {
+  if (parsearBufferMonto(bufferMonto) <= 0) {
+    shakeMonto();
+    return;
+  }
+  document.getElementById('panel-elegir-monto').textContent = '$ ' + formatearBufferMonto(bufferMonto);
+  document.getElementById('panel-elegir-categoria').hidden = false;
+}
+
+function cerrarPanelElegirCategoria() {
+  document.getElementById('panel-elegir-categoria').hidden = true;
 }
 
 function shakeMonto() {
@@ -549,8 +563,15 @@ function configurarRegistrarGasto() {
   document.getElementById('grid-categorias').addEventListener('click', (ev) => {
     const tarjeta = ev.target.closest('.categoria-card');
     if (!tarjeta || !estado) return;
-    animarElemento(tarjeta, 'pulso', 400);
+    cerrarPanelElegirCategoria();
     onTocarCategoria(tarjeta.dataset.categoriaId);
+  });
+
+  document.getElementById('btn-elegir-categoria').addEventListener('click', abrirPanelElegirCategoria);
+  document.getElementById('btn-elegir-cancelar').addEventListener('click', cerrarPanelElegirCategoria);
+  // Tocar fuera del panel también lo cierra.
+  document.getElementById('panel-elegir-categoria').addEventListener('click', (ev) => {
+    if (ev.target === ev.currentTarget) cerrarPanelElegirCategoria();
   });
 
   const inputFecha = document.getElementById('input-fecha');
