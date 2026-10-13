@@ -106,6 +106,7 @@ function iniciarApp() {
 
   actualizarTotalHeader();
   configurarNavegacion();
+  configurarMangometro();
   configurarRegistrarGasto();
   configurarPantallaCategorias();
   configurarHistorial();
@@ -178,6 +179,68 @@ function actualizarTotalHeader() {
   if (el.dataset.inicializado && el.textContent !== texto) animarElemento(el, 'actualizado', 500);
   el.dataset.inicializado = '1';
   el.textContent = texto;
+  // Achicar la letra si el total es largo, para que no choque con el botón de Ajustes.
+  el.classList.toggle('app-header__total-monto--mediano', texto.length > 12 && texto.length <= 14);
+  el.classList.toggle('app-header__total-monto--chico', texto.length > 14);
+  actualizarMangometro();
+}
+
+/* =========================================================================
+   Mangómetro: el mango del encabezado se llena franja por franja según lo
+   gastado este mes comparado con el total del mes anterior.
+   ========================================================================= */
+
+function datosMangometro() {
+  const hoy = new Date();
+  const anterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  const totalActual = totalDelMes(hoy.getFullYear(), hoy.getMonth());
+  const totalAnterior = totalDelMes(anterior.getFullYear(), anterior.getMonth());
+  const nombreMesAnterior = anterior.toLocaleDateString('es-AR', { month: 'long' });
+  const proporcion = totalAnterior > 0 ? totalActual / totalAnterior : null;
+  return { totalActual, totalAnterior, nombreMesAnterior, proporcion };
+}
+
+function mensajeMangometro(d) {
+  if (d.proporcion === null) {
+    return d.totalActual > 0
+      ? 'En ' + d.nombreMesAnterior + ' no registraste gastos, así que todavía no hay con qué comparar.'
+      : 'Cuando registres gastos, el mango se va a ir llenando comparado con el mes anterior.';
+  }
+  const porcentaje = Math.round(d.proporcion * 100);
+  if (porcentaje <= 100) {
+    return 'Llevás el ' + porcentaje + '% de lo que gastaste en ' + d.nombreMesAnterior +
+      ' (' + formatearMonto(d.totalActual) + ' de ' + formatearMonto(d.totalAnterior) + ').';
+  }
+  return 'Ya gastaste un ' + (porcentaje - 100) + '% más que en ' + d.nombreMesAnterior +
+    ' (' + formatearMonto(d.totalActual) + ' contra ' + formatearMonto(d.totalAnterior) + ').';
+}
+
+function actualizarMangometro() {
+  const boton = document.getElementById('mangometro');
+  if (!boton) return;
+  const d = datosMangometro();
+  const franjas = boton.querySelectorAll('.mangometro__franja');
+  const total = franjas.length;
+  // Con algo gastado se enciende al menos una franja, para que se note el movimiento.
+  let encendidas = 0;
+  if (d.proporcion !== null) {
+    encendidas = Math.min(total, Math.round(d.proporcion * total));
+    if (d.totalActual > 0 && encendidas === 0) encendidas = 1;
+  }
+  // Las franjas se encienden de abajo hacia arriba.
+  franjas.forEach((franja, i) => {
+    franja.classList.toggle('is-encendida', i >= total - encendidas);
+    // Se encienden en cascada desde abajo.
+    franja.style.transitionDelay = (total - 1 - i) * 35 + 'ms';
+  });
+  boton.classList.toggle('is-excedido', d.proporcion !== null && d.proporcion > 1);
+  boton.setAttribute('aria-label', 'Mangómetro: ' + mensajeMangometro(d));
+}
+
+function configurarMangometro() {
+  document.getElementById('mangometro').addEventListener('click', () => {
+    mostrarToast(mensajeMangometro(datosMangometro()));
+  });
 }
 
 /* =========================================================================

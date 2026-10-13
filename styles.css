@@ -165,9 +165,56 @@ h2 {
   z-index: 10;
 }
 
+.app-header__marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mangometro {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-borde);
+  border-radius: 16px;
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.15s var(--ease);
+}
+
+.mangometro:active {
+  transform: scale(0.92);
+}
+
+.mangometro__svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+/* Franjas apagadas: el contorno del mango se sigue viendo, en tenue. */
+.mangometro__franja {
+  fill: color-mix(in srgb, var(--color-texto) 16%, transparent);
+  transition: fill 0.4s var(--ease);
+}
+
+.mangometro__franja.is-encendida {
+  fill: url(#mm-grad);
+}
+
+.mangometro.is-excedido .mangometro__franja.is-encendida {
+  fill: url(#mm-grad-excedido);
+}
+
 .app-header__total {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   gap: 2px;
 }
 
@@ -185,6 +232,14 @@ h2 {
   letter-spacing: -0.03em;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+}
+
+.app-header__total-monto--mediano {
+  font-size: 1.6rem;
+}
+
+.app-header__total-monto--chico {
+  font-size: 1.3rem;
 }
 
 .app-header__total-monto.actualizado {

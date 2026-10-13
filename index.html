@@ -30,9 +30,25 @@
 <body>
 
 <header class="app-header">
-  <div class="app-header__total">
-    <span class="app-header__total-label">Gastado este mes</span>
-    <span class="app-header__total-monto" id="header-total-mes">$ 0,00</span>
+  <div class="app-header__marca">
+    <!-- Mangómetro: el mango del logo se llena franja por franja según lo gastado
+         este mes comparado con el mes anterior. -->
+    <button class="mangometro" id="mangometro" type="button" aria-label="Mangómetro">
+      <svg class="mangometro__svg" viewBox="20 4 72 90" aria-hidden="true">
+        <defs>
+          <linearGradient id="mm-grad" gradientUnits="userSpaceOnUse" x1="40" y1="24" x2="70" y2="92"><stop offset="0" stop-color="#ffc857"/><stop offset="0.55" stop-color="#ff9f45"/><stop offset="1" stop-color="#f06a4f"/></linearGradient>
+          <linearGradient id="mm-grad-excedido" gradientUnits="userSpaceOnUse" x1="40" y1="24" x2="70" y2="92"><stop offset="0" stop-color="#ff9f45"/><stop offset="1" stop-color="#e5484d"/></linearGradient>
+          <clipPath id="mm-clip"><path d="M60 24 C78 24 88 42 84 60 C80 79 63 92 46 90 C33 89 26 80 28 70 C30 61 37 57 39 48 C41 37 46 24 60 24 Z"/></clipPath>
+        </defs>
+        <g clip-path="url(#mm-clip)"><rect class="mangometro__franja" x="10" y="24.5" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="30.6" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="36.7" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="42.8" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="48.9" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="55.0" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="61.1" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="67.2" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="73.3" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="79.4" width="80" height="4.4" rx="2.2"/><rect class="mangometro__franja" x="10" y="85.5" width="80" height="4.4" rx="2.2"/></g>
+        <path d="M60 26 C59 22 58 19 55 16" stroke="#5be3a6" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+        <path d="M60 25 C60 15 68 8 81 8 C80 19 72 26 60 25 Z" fill="#5be3a6"/>
+      </svg>
+    </button>
+    <div class="app-header__total">
+      <span class="app-header__total-label">Gastado este mes</span>
+      <span class="app-header__total-monto" id="header-total-mes">$ 0,00</span>
+    </div>
   </div>
   <button class="app-header__ajustes" id="btn-ajustes" type="button" aria-label="Ajustes"><svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
 </header>
