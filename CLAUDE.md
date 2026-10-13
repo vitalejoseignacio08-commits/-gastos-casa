@@ -1,4 +1,4 @@
-# Mis Gastos — PWA de gastos del hogar
+# Al Mango — PWA de gastos del hogar
 
 PWA para registrar gastos del hogar, pensada solo para celular. Se publica en GitHub Pages.
 
@@ -29,7 +29,12 @@ PWA para registrar gastos del hogar, pensada solo para celular. Se publica en Gi
 
 ## Decisiones de producto
 
-- Nombre de la app (manifest, pantalla de inicio): **"Mis Gastos"**.
+- Nombre de la app (manifest, pantalla de inicio): **"Al Mango"**, lema **"Cada mango cuenta."**
+  ("al mango" en el sentido de llevar las cuentas peso por peso). Antes se llamaba "Mis Gastos";
+  la clave de localStorage (`misGastosData`) y el prefijo de cache del service worker no cambian.
+- Logo: silueta de mango formada por franjas horizontales (monedas apiladas / mangos contados), con
+  degradé cálido y hoja verde menta sobre fondo oscuro. Los íconos tienen fondo a sangre y el arte
+  dentro de la zona segura, así que sirven como `any maskable`.
 - Navegación: pestañas abajo (Registrar, Historial, Resumen, Categorías) + ícono de Ajustes arriba.
 - Registrar en dos pasos: la pantalla tiene solo fecha, monto y teclado grande + botón "Elegir
   categoría"; ese botón abre un panel inferior con todas las categorías en grilla (si el monto es 0,
