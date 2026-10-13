@@ -2,7 +2,7 @@
 
 // Subir este número fuerza a los dispositivos a descartar la cache vieja
 // y volver a descargar todos los archivos la próxima vez que abran la app.
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const NOMBRE_CACHE = 'mis-gastos-' + CACHE_VERSION;
 
 const ARCHIVOS_PARA_CACHEAR = [

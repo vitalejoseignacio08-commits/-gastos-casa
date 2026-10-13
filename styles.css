@@ -109,6 +109,7 @@ button {
 
 .app-main {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 16px;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
@@ -120,12 +121,23 @@ button {
 
 /* Registrar gasto */
 
+/* La pantalla ocupa exactamente el alto disponible: monto fijo arriba,
+   teclado fijo abajo y las categorías scrollean en el medio. Así el número
+   que se está tipeando siempre queda a la vista. */
+#pantalla-registrar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .fecha-selector {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .fecha-selector__label {
@@ -150,12 +162,25 @@ button {
 }
 
 .monto-display {
+  flex-shrink: 0;
   font-size: 2.75rem;
   font-weight: 800;
   text-align: center;
-  margin: 8px 0 20px;
+  margin: 4px 0 12px;
   letter-spacing: -1px;
+  line-height: 1.15;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
   transition: color 0.3s;
+}
+
+/* Achicar la letra cuando el monto es largo para que no se corte. */
+.monto-display--mediano {
+  font-size: 2.2rem;
+}
+
+.monto-display--chico {
+  font-size: 1.8rem;
 }
 
 .monto-display.guardado-ok {
@@ -163,10 +188,19 @@ button {
 }
 
 .grid-categorias {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: min-content;
+  align-content: start;
   gap: 10px;
-  margin-bottom: 20px;
+  /* Margen interno para que la animación al tocar no quede recortada. */
+  padding: 2px;
+  margin: 0 -2px 12px;
 }
 
 .categoria-card {
@@ -200,6 +234,7 @@ button {
 }
 
 .teclado-numerico {
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
@@ -209,7 +244,10 @@ button {
   background: var(--color-superficie);
   border: 1px solid var(--color-borde);
   border-radius: 12px;
-  padding: 16px 0;
+  padding: 13px 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--color-texto);

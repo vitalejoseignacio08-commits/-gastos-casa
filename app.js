@@ -278,7 +278,11 @@ function parsearBufferMonto(buffer) {
 }
 
 function actualizarDisplayMonto() {
-  document.getElementById('monto-display').textContent = '$ ' + formatearBufferMonto(bufferMonto);
+  const el = document.getElementById('monto-display');
+  const texto = '$ ' + formatearBufferMonto(bufferMonto);
+  el.textContent = texto;
+  el.classList.toggle('monto-display--mediano', texto.length > 10 && texto.length <= 13);
+  el.classList.toggle('monto-display--chico', texto.length > 13);
 }
 
 function shakeMonto() {
